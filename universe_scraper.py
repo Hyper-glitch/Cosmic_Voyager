@@ -1,7 +1,10 @@
 import os.path
 import pathlib
 import urllib.parse as urllib
+from datetime import datetime
 
+import aiofiles
+import aiohttp
 import requests
 
 
@@ -15,7 +18,7 @@ class SpaceXAPI:
         self.session = requests.Session()
         self.session.headers.update(self.headers)
 
-    def get_json(self, endpoint):
+    def get_json(self, endpoint) -> dict:
         url = urllib.urljoin(self.base_url, endpoint)
         response = self.session.get(url=url)
         response.raise_for_status()
@@ -27,31 +30,61 @@ class SpaceXAPI:
 
     def get_latest_launch_with_images(self):
         endpoint = 'launches'
-        return self.get_json(endpoint=endpoint)
+        launches = self.get_json(endpoint=endpoint)
 
-    def save_image(self, image_url, save_path):
-        response = self.session.get(url=image_url)
-        response.raise_for_status()
+        image_urls = []
 
-        with open(save_path, 'wb') as image:
-            image.write(response.content)
+        for launch in launches:
+            images = launch['links']['flickr']['original']
+            if images:
+                image_urls.extend(images)
+        return image_urls
+
+    def save_images(self, dir_path, image_urls):
+        start = datetime.now()
+        for image_url in image_urls:
+            filename = urllib.urlparse(image_url).path.split('/')[2] # не смог придумать лучше реализацию, подскажи пожалуйста, если есть идеи без магической цифры
+            save_path = os.path.join(dir_path, filename)
+
+            response = self.session.get(url=image_url)
+            response.raise_for_status()
+
+            with open(save_path, 'wb') as image:
+                image.write(response.content)
+        print(datetime.now() - start)
+
+    async def async_save_images(self, dir_path, image_urls):
+        start = datetime.now()
+
+        async with aiohttp.ClientSession() as session:
+
+            for image_url in image_urls:
+                async with session.get(image_url) as response:
+                    filename = urllib.urlparse(image_url).path.split('/')[2]
+                    save_path = os.path.join(dir_path, filename)
+                    response.raise_for_status()
+
+                    image = await aiofiles.open(save_path, 'wb')
+                    await image.write(await response.read())
+                    await image.close()
+
+        print(datetime.now() - start)
 
 
 def main():
-    image_url = 'https://upload.wikimedia.org/wikipedia/commons/3/3f/HST-SM4.jpeg'
-    filename = 'hubble_telescope.jpg'
     dir_path = 'images/'
-    save_path = os.path.join(dir_path, filename)
-
     pathlib.Path(dir_path).mkdir(parents=True, exist_ok=True)
     space_x_instance = SpaceXAPI()
+
     latest_launch = space_x_instance.get_latest_launch()
-    launch_images = latest_launch['links']['flickr']['original']
+    image_urls = latest_launch['links']['flickr']['original']
 
-    if not launch_images:
-        latest_launch = space_x_instance.get_latest_launch_with_images()
+    if not image_urls:
+        image_urls = space_x_instance.get_latest_launch_with_images()
 
-    space_x_instance.save_image(image_url=image_url, save_path=save_path)
+    # loop = asyncio.get_event_loop()
+    # loop.run_until_complete(space_x_instance.async_save_images(dir_path=dir_path, image_urls=image_urls[:100]))
+    space_x_instance.save_images(dir_path=dir_path, image_urls=image_urls)
 
 
 if __name__ == '__main__':

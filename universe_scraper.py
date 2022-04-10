@@ -41,13 +41,12 @@ class SpaceXAPI:
         return image_urls
 
     @staticmethod
-    def save_images(dir_path, images_content):
-        file_order = 0
-        file_extension = '.jpg'
-        for image_content in images_content:
-            file_order += 1
-            filename = str(file_order) + file_extension
+    def save_images(dir_path, images_content, file_extension, image_name):
+
+        for index, image_content in enumerate(images_content):
+            filename = f'{image_name}{index}{file_extension}'
             save_path = os.path.join(dir_path, filename)
+
             with open(save_path, 'wb') as image:
                 image.write(image_content)
 
@@ -70,7 +69,11 @@ async def get_images_content(image_urls):
 
 def main():
     start = datetime.now()
+
     dir_path = 'images/'
+    file_extension = '.jpg'
+    image_name = 'spacex'
+
     pathlib.Path(dir_path).mkdir(parents=True, exist_ok=True)
     space_x_instance = SpaceXAPI()
 
@@ -81,7 +84,9 @@ def main():
         image_urls = space_x_instance.get_latest_launch_with_images()
 
     images_content = asyncio.run(get_images_content(image_urls))
-    space_x_instance.save_images(dir_path=dir_path, images_content=images_content)
+    space_x_instance.save_images(dir_path=dir_path, images_content=images_content,
+                                 file_extension=file_extension, image_name=image_name
+                                 )
     print(datetime.now() - start)
 
 

@@ -4,6 +4,10 @@ import urllib.parse as urllib
 import requests
 
 
+# add ABC class here, we don't need implement get_json twice or more
+from dotenv import load_dotenv
+
+
 class SpaceXAPI:
     def __init__(self):
         self.base_url = 'https://api.spacexdata.com/v4/'
@@ -48,15 +52,15 @@ class SpaceXAPI:
 
 
 class NasaAPI:
-    def __init__(self):
+    def __init__(self, token):
         self.base_url = 'https://api.nasa.gov/planetary/'
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
                           'Chrome/70.0.3538.77 Safari/537.36',
-            'api_key': 123,
         }
         self.session = requests.Session()
         self.session.headers.update(self.headers)
+        self.session.params = {'api_key': token}
 
     def get_json(self, endpoint) -> dict:
         url = urllib.urljoin(self.base_url, endpoint)
@@ -71,3 +75,11 @@ class NasaAPI:
         """
         endpoint = 'apod'
         return self.get_json(endpoint=endpoint)
+
+
+if __name__ == '__main__':
+    load_dotenv()
+    nasa_token = os.getenv('NASA_API_KEY')
+
+    nasa_instance = NasaAPI(token=nasa_token)
+    apod = nasa_instance.get_apod()

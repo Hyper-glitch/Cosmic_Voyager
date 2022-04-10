@@ -71,5 +71,5 @@ class NasaAPI:
         return image_urls
 
 
-def get_image_extension(url):
+async def get_image_extension(url):
     return os.path.splitext(url)[1]

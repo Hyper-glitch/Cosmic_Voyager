@@ -45,3 +45,29 @@ class SpaceXAPI:
 
             with open(save_path, 'wb') as image:
                 image.write(image_content)
+
+
+class NasaAPI:
+    def __init__(self):
+        self.base_url = 'https://api.nasa.gov/planetary/'
+        self.headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                          'Chrome/70.0.3538.77 Safari/537.36',
+            'api_key': 123,
+        }
+        self.session = requests.Session()
+        self.session.headers.update(self.headers)
+
+    def get_json(self, endpoint) -> dict:
+        url = urllib.urljoin(self.base_url, endpoint)
+        response = self.session.get(url=url)
+        response.raise_for_status()
+        return response.json()
+
+    def get_apod(self):
+        """
+        APOD it's an Astronomy Picture of the Day
+        :return:
+        """
+        endpoint = 'apod'
+        return self.get_json(endpoint=endpoint)

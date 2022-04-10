@@ -1,9 +1,9 @@
+import asyncio
 import os.path
 import pathlib
 import urllib.parse as urllib
 from datetime import datetime
 
-import aiofiles
 import aiohttp
 import requests
 
@@ -40,38 +40,36 @@ class SpaceXAPI:
                 image_urls.extend(images)
         return image_urls
 
-    def save_images(self, dir_path, image_urls):
-        start = datetime.now()
-        for image_url in image_urls:
-            filename = urllib.urlparse(image_url).path.split('/')[2] # не смог придумать лучше реализацию, подскажи пожалуйста, если есть идеи без магической цифры
+    @staticmethod
+    def save_images(dir_path, images_content):
+        file_order = 0
+        file_extension = '.jpg'
+        for image_content in images_content:
+            file_order += 1
+            filename = str(file_order) + file_extension
             save_path = os.path.join(dir_path, filename)
-
-            response = self.session.get(url=image_url)
-            response.raise_for_status()
-
             with open(save_path, 'wb') as image:
-                image.write(response.content)
-        print(datetime.now() - start)
+                image.write(image_content)
 
-    async def async_save_images(self, dir_path, image_urls):
-        start = datetime.now()
 
-        async with aiohttp.ClientSession() as session:
+async def fetch(image_url, session):
+    async with session.get(image_url) as response:
+        response.raise_for_status()
+        content = await response.read()
+        return content
 
-            for image_url in image_urls:
-                async with session.get(image_url) as response:
-                    filename = urllib.urlparse(image_url).path.split('/')[2]
-                    save_path = os.path.join(dir_path, filename)
-                    response.raise_for_status()
 
-                    image = await aiofiles.open(save_path, 'wb')
-                    await image.write(await response.read())
-                    await image.close()
-
-        print(datetime.now() - start)
+async def get_images_content(image_urls):
+    tasks = []
+    async with aiohttp.ClientSession() as session:
+        for image_url in image_urls:
+            tasks.append(asyncio.create_task(fetch(image_url, session)))
+        images_content = asyncio.gather(*tasks)
+        return await images_content
 
 
 def main():
+    start = datetime.now()
     dir_path = 'images/'
     pathlib.Path(dir_path).mkdir(parents=True, exist_ok=True)
     space_x_instance = SpaceXAPI()
@@ -82,9 +80,9 @@ def main():
     if not image_urls:
         image_urls = space_x_instance.get_latest_launch_with_images()
 
-    # loop = asyncio.get_event_loop()
-    # loop.run_until_complete(space_x_instance.async_save_images(dir_path=dir_path, image_urls=image_urls[:100]))
-    space_x_instance.save_images(dir_path=dir_path, image_urls=image_urls)
+    images_content = asyncio.run(get_images_content(image_urls))
+    space_x_instance.save_images(dir_path=dir_path, images_content=images_content)
+    print(datetime.now() - start)
 
 
 if __name__ == '__main__':

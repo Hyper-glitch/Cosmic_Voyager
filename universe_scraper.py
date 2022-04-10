@@ -3,7 +3,7 @@ import pathlib
 
 import aiohttp
 
-from cosmic_api import SpaceXAPI
+from cosmic_APIs import SpaceXAPI
 
 
 async def fetch(image_url, session):

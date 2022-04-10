@@ -1,9 +1,11 @@
 import asyncio
+import os
 import pathlib
 
 import aiohttp
+from dotenv import load_dotenv
 
-from cosmic_APIs import SpaceXAPI
+from cosmic_APIs import SpaceXAPI, NasaAPI
 
 
 async def fetch(image_url, session):
@@ -23,12 +25,17 @@ async def get_images_content(image_urls):
 
 
 def main():
+    load_dotenv()
+    nasa_token = os.getenv('NASA_API_KEY')
+
     dir_path = 'images/'
     file_extension = '.jpg'
     image_name = 'spacex'
     pathlib.Path(dir_path).mkdir(parents=True, exist_ok=True)
 
     space_x_instance = SpaceXAPI()
+    nasa_instance = NasaAPI(token=nasa_token)
+
     latest_launch = space_x_instance.get_latest_launch()
 
     image_urls = latest_launch['links']['flickr']['original']

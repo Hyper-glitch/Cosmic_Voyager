@@ -1,6 +1,5 @@
 import asyncio
 import pathlib
-from datetime import datetime
 
 import aiohttp
 
@@ -24,16 +23,14 @@ async def get_images_content(image_urls):
 
 
 def main():
-    start = datetime.now()
-
     dir_path = 'images/'
     file_extension = '.jpg'
     image_name = 'spacex'
-
     pathlib.Path(dir_path).mkdir(parents=True, exist_ok=True)
-    space_x_instance = SpaceXAPI()
 
+    space_x_instance = SpaceXAPI()
     latest_launch = space_x_instance.get_latest_launch()
+
     image_urls = latest_launch['links']['flickr']['original']
 
     if not image_urls:
@@ -43,7 +40,6 @@ def main():
     space_x_instance.save_images(dir_path=dir_path, images_content=images_content,
                                  file_extension=file_extension, image_name=image_name
                                  )
-    print(datetime.now() - start)
 
 
 if __name__ == '__main__':

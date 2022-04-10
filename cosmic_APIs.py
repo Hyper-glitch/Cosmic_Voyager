@@ -2,6 +2,9 @@ import os.path
 import urllib.parse as urllib
 
 import requests
+from dotenv import load_dotenv
+
+from scraper_utils import make_images_dir
 
 
 # add ABC class here, we don't need implement get_json twice or more
@@ -40,7 +43,7 @@ class SpaceXAPI:
 
 class NasaAPI:
     def __init__(self, token):
-        self.base_url = 'https://api.nasa.gov/planetary/'
+        self.base_url = 'https://api.nasa.gov/'
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
                           'Chrome/70.0.3538.77 Safari/537.36',
@@ -60,7 +63,7 @@ class NasaAPI:
         APOD it's an Astronomy Picture of the Day
         :return:
         """
-        endpoint = 'apod'
+        endpoint = 'planetary/apod'
         images = self.get_json(endpoint=endpoint, params={'count': count})
 
         image_urls = []
@@ -69,3 +72,32 @@ class NasaAPI:
             if hd_image_url:
                 image_urls.append(hd_image_url)
         return image_urls
+
+    def get_epic_meta(self, image_type):
+        endpoint = 'EPIC/api/natural/images'
+        images = self.get_json(endpoint=endpoint)
+
+        date = images[0]['date']
+        filenames = []
+        for image in images:
+            filename = image['image'] + image_type
+            filenames.append(filename)
+        return date, filenames
+
+    def get_epic_images(self, date, filenames):
+        # https://api.nasa.gov/EPIC/archive/natural/2019/05/30/png/epic_1b_20190530011359.png?api_key=DEMO_KEY
+        endpoint = 'EPIC/archive/natural'
+        parsed_date = date.split(' ')[0].replace('-', '/')
+        url = urllib.urljoin(self.base_url, endpoint, parsed_date)
+
+
+if __name__ == '__main__':
+    load_dotenv()
+    nasa_token = os.getenv('NASA_API_KEY')
+    image_name = 'nasa'
+    image_type = '.png'
+    make_images_dir(dir_path='images/')
+
+    nasa_instance = NasaAPI(token=nasa_token)
+    date, filenames = nasa_instance.get_epic_meta(image_type=image_type)
+    epic_images = nasa_instance.get_epic_images(date, filenames)

@@ -109,5 +109,5 @@ if __name__ == '__main__':
     nasa_instance = NasaAPI(token=nasa_token)
     date, filenames = nasa_instance.get_epic_meta(image_type=image_type)
     epic_urls = nasa_instance.get_epic_urls(date, filenames, image_type)
-    epic_content = asyncio.run(get_images_content(image_urls=epic_urls, params=params))
+    epic_content = asyncio.run(get_images_content(image_urls=epic_urls, params=params)) # check parsing time with params in aiohttp.ClientSession
     save_images(dir_path='images/', images_content=epic_content, image_name=image_name)

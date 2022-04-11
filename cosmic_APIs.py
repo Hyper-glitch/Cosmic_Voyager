@@ -53,9 +53,9 @@ class NasaAPI:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
                           'Chrome/70.0.3538.77 Safari/537.36',
         }
+        self.params = {'api_key': token}
         self.session = requests.Session()
         self.session.headers.update(self.headers)
-        self.session.params = {'api_key': token}
 
     def get_json(self, endpoint, params=None) -> dict:
         url = urllib.urljoin(self.base_url, endpoint)
@@ -101,27 +101,25 @@ class NasaAPI:
         return epic_urls
 
     def save_apod_images(self, dir_path, image_name):
-        sub_dir = 'APOD'
-        dir_path = os.path.join(dir_path, sub_dir)
+        subdir = 'APOD'
+        save_path = os.path.join(dir_path, subdir)
 
-        make_images_dir(dir_path=dir_path)
+        make_images_dir(dir_path=save_path)
         apod_image_urls = self.get_apod_urls(count=50)
         images_content = asyncio.run(get_images_content(image_urls=apod_image_urls))
         save_images(dir_path=dir_path, images_content=images_content, image_name=image_name)
 
+    def save_epic_images(self, dir_path, image_type, image_name):
+        subdir = 'EPIC'
+        save_path = os.path.join(dir_path, subdir)
+
+        make_images_dir(dir_path=save_path)
+        date, filenames = self.get_epic_meta(image_type=image_type)
+        epic_urls = self.get_epic_urls(date, filenames, image_type)
+        epic_content = asyncio.run(get_images_content(image_urls=epic_urls, params=self.params))
+        save_images(dir_path=dir_path, images_content=epic_content, image_name=image_name)
+
 
 if __name__ == '__main__':
     start = datetime.now()
-    load_dotenv()
-    nasa_token = os.getenv('NASA_API_KEY')
-    image_name = 'nasa'
-    image_type = 'png'
-    make_images_dir(dir_path='images/')
-    params = {'api_key': nasa_token}
-
-    nasa_instance = NasaAPI(token=nasa_token)
-    date, filenames = nasa_instance.get_epic_meta(image_type=image_type)
-    epic_urls = nasa_instance.get_epic_urls(date, filenames, image_type)
-    epic_content = asyncio.run(get_images_content(image_urls=epic_urls, params=params))
-    save_images(dir_path='images/', images_content=epic_content, image_name=image_name)
     print(datetime.now() - start)

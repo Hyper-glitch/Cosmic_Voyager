@@ -1,11 +1,14 @@
 import asyncio
 import os.path
 import urllib.parse as urllib
+from datetime import datetime
+from typing import List
 
 import requests
 from dotenv import load_dotenv
 
 from scraper_utils import make_images_dir, get_images_content, save_images
+
 
 # add ABC class here, we don't need implement get_json twice or more
 
@@ -60,7 +63,7 @@ class NasaAPI:
         response.raise_for_status()
         return response.json()
 
-    def get_apod(self, count):
+    def get_apod_urls(self, count) -> List:
         """
         APOD it's an Astronomy Picture of the Day
         :return:
@@ -86,19 +89,29 @@ class NasaAPI:
             filenames.append(filename)
         return date, filenames
 
-    def get_epic_urls(self, date, filenames, image_type):
-        # https://api.nasa.gov/EPIC/archive/natural/2019/05/30/png/epic_1b_20190530011359.png?api_key=DEMO_KEY
+    def get_epic_urls(self, date, filenames, image_type) -> List:
+        # url example https://api.nasa.gov/EPIC/archive/natural/2019/05/30/png/epic_1b_20190530011359.png?api_key=DEMO_KEY
         endpoint = 'EPIC/archive/natural/'
-        parsed_date = date.split(' ')[0].replace('-', '/')
+        parsed_date = date.split(' ')[0].replace('-', '/')  # не придумал лучшего решения, если есть, подскажи плиз
+        epic_urls = []
 
-        urls = []
         for filename in filenames:
-            url = urllib.urljoin(self.base_url, endpoint) + parsed_date + f'/{image_type}/' + filename
-            urls.append(url)
-        return urls
+            url = urllib.urljoin(self.base_url, endpoint) + parsed_date + f'/{image_type}/' + filename  # здесь тоже
+            epic_urls.append(url)
+        return epic_urls
+
+    def save_apod_images(self, dir_path, image_name):
+        sub_dir = 'APOD'
+        dir_path = os.path.join(dir_path, sub_dir)
+
+        make_images_dir(dir_path=dir_path)
+        apod_image_urls = self.get_apod_urls(count=50)
+        images_content = asyncio.run(get_images_content(image_urls=apod_image_urls))
+        save_images(dir_path=dir_path, images_content=images_content, image_name=image_name)
 
 
 if __name__ == '__main__':
+    start = datetime.now()
     load_dotenv()
     nasa_token = os.getenv('NASA_API_KEY')
     image_name = 'nasa'
@@ -109,5 +122,6 @@ if __name__ == '__main__':
     nasa_instance = NasaAPI(token=nasa_token)
     date, filenames = nasa_instance.get_epic_meta(image_type=image_type)
     epic_urls = nasa_instance.get_epic_urls(date, filenames, image_type)
-    epic_content = asyncio.run(get_images_content(image_urls=epic_urls, params=params)) # check parsing time with params in aiohttp.ClientSession
+    epic_content = asyncio.run(get_images_content(image_urls=epic_urls, params=params))
     save_images(dir_path='images/', images_content=epic_content, image_name=image_name)
+    print(datetime.now() - start)

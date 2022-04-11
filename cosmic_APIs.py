@@ -1,13 +1,15 @@
+import asyncio
 import os.path
 import urllib.parse as urllib
 
 import requests
 from dotenv import load_dotenv
 
-from scraper_utils import make_images_dir
-
+from scraper_utils import make_images_dir, get_images_content, save_images
 
 # add ABC class here, we don't need implement get_json twice or more
+
+
 class SpaceXAPI:
     def __init__(self):
         self.base_url = 'https://api.spacexdata.com/v4/'
@@ -80,24 +82,32 @@ class NasaAPI:
         date = images[0]['date']
         filenames = []
         for image in images:
-            filename = image['image'] + image_type
+            filename = image['image'] + f'.{image_type}'
             filenames.append(filename)
         return date, filenames
 
-    def get_epic_images(self, date, filenames):
+    def get_epic_urls(self, date, filenames, image_type):
         # https://api.nasa.gov/EPIC/archive/natural/2019/05/30/png/epic_1b_20190530011359.png?api_key=DEMO_KEY
-        endpoint = 'EPIC/archive/natural'
+        endpoint = 'EPIC/archive/natural/'
         parsed_date = date.split(' ')[0].replace('-', '/')
-        url = urllib.urljoin(self.base_url, endpoint, parsed_date)
+
+        urls = []
+        for filename in filenames:
+            url = urllib.urljoin(self.base_url, endpoint) + parsed_date + f'/{image_type}/' + filename
+            urls.append(url)
+        return urls
 
 
 if __name__ == '__main__':
     load_dotenv()
     nasa_token = os.getenv('NASA_API_KEY')
     image_name = 'nasa'
-    image_type = '.png'
+    image_type = 'png'
     make_images_dir(dir_path='images/')
+    params = {'api_key': nasa_token}
 
     nasa_instance = NasaAPI(token=nasa_token)
     date, filenames = nasa_instance.get_epic_meta(image_type=image_type)
-    epic_images = nasa_instance.get_epic_images(date, filenames)
+    epic_urls = nasa_instance.get_epic_urls(date, filenames, image_type)
+    epic_content = asyncio.run(get_images_content(image_urls=epic_urls, params=params))
+    save_images(dir_path='images/', images_content=epic_content, image_name=image_name)

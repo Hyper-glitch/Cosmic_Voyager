@@ -30,16 +30,14 @@ def run_spacex_scraper():
 def run_nasa_scraper():
     load_dotenv()
     nasa_token = os.getenv('NASA_API_KEY')
-    image_name = 'nasa'
-    image_type = 'png'
 
-    dir_path = os.path.join(PATH_TO_SAVE_IMAGES, image_name)
+    scraper_name = 'nasa'
+    image_type = 'png'
+    dir_path = os.path.join(PATH_TO_SAVE_IMAGES, scraper_name)
 
     nasa_instance = NasaAPI(token=nasa_token)
-    nasa_instance.save_apod_images(dir_path=dir_path, image_name=image_name)
-
-    date, filenames = nasa_instance.get_epic_meta(image_type=image_type)
-    epic_urls = nasa_instance.get_epic_urls(date, filenames, image_type)
+    nasa_instance.save_apod_images(dir_path=dir_path, image_name=scraper_name)
+    nasa_instance.save_epic_images(dir_path=dir_path, image_type=image_type, image_name=scraper_name)
 
 
 if __name__ == '__main__':

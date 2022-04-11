@@ -18,24 +18,24 @@ def save_images(dir_path, images_content, image_name):
             image.write(image_content['content'])
 
 
-async def fetch(image_url, session):
+async def fetch(image_url, session, params=None):
     image_content = {}
-    async with session.get(image_url) as response:
+    async with session.get(image_url, params=params) as response:
         response.raise_for_status()
         content = await response.read()
-        image_extension = await get_image_extension(response.url.name)
+        image_extension = get_image_extension(response.url.name)
         image_content.update({'content': content, 'image_extension': image_extension})
         return image_content
 
 
-async def get_images_content(image_urls):
+async def get_images_content(image_urls, params=None):
     tasks = []
     async with aiohttp.ClientSession() as session:
         for image_url in image_urls:
-            tasks.append(asyncio.create_task(fetch(image_url, session)))
+            tasks.append(asyncio.create_task(fetch(image_url, session, params)))
         images_content = asyncio.gather(*tasks)
         return await images_content
 
 
-async def get_image_extension(url):
+def get_image_extension(url):
     return os.path.splitext(url)[1]

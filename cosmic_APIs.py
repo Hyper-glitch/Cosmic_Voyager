@@ -56,6 +56,7 @@ class NasaAPI:
         self.params = {'api_key': token}
         self.session = requests.Session()
         self.session.headers.update(self.headers)
+        self.session.params = self.params
 
     def get_json(self, endpoint, params=None) -> dict:
         url = urllib.urljoin(self.base_url, endpoint)
@@ -107,7 +108,7 @@ class NasaAPI:
         make_images_dir(dir_path=save_path)
         apod_image_urls = self.get_apod_urls(count=50)
         images_content = asyncio.run(get_images_content(image_urls=apod_image_urls))
-        save_images(dir_path=dir_path, images_content=images_content, image_name=image_name)
+        save_images(dir_path=save_path, images_content=images_content, image_name=image_name)
 
     def save_epic_images(self, dir_path, image_type, image_name):
         subdir = 'EPIC'
@@ -117,7 +118,7 @@ class NasaAPI:
         date, filenames = self.get_epic_meta(image_type=image_type)
         epic_urls = self.get_epic_urls(date, filenames, image_type)
         epic_content = asyncio.run(get_images_content(image_urls=epic_urls, params=self.params))
-        save_images(dir_path=dir_path, images_content=epic_content, image_name=image_name)
+        save_images(dir_path=save_path, images_content=epic_content, image_name=image_name)
 
 
 if __name__ == '__main__':

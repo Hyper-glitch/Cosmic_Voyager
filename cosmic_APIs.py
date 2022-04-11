@@ -1,11 +1,9 @@
 import asyncio
 import os.path
 import urllib.parse as urllib
-from datetime import datetime
 from typing import List
 
 import requests
-from dotenv import load_dotenv
 
 from scraper_utils import make_images_dir, get_images_content, save_images
 
@@ -119,8 +117,3 @@ class NasaAPI:
         epic_urls = self.get_epic_urls(date, filenames, image_type)
         epic_content = asyncio.run(get_images_content(image_urls=epic_urls, params=self.params))
         save_images(dir_path=save_path, images_content=epic_content, image_name=image_name)
-
-
-if __name__ == '__main__':
-    start = datetime.now()
-    print(datetime.now() - start)

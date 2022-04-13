@@ -8,24 +8,23 @@ import requests
 from scraper_utils import make_images_dir, get_images_content, save_images
 
 
-# add ABC class here, we don't need implement get_json twice or more
-
-
-class SpaceXAPI:
-    def __init__(self):
-        self.base_url = 'https://api.spacexdata.com/v4/'
-        self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
-                          'Chrome/70.0.3538.77 Safari/537.36',
-        }
+class BaseAPI:
+    def __init__(self, base_url, headers):
+        self.base_url = base_url
+        self.headers = headers
         self.session = requests.Session()
         self.session.headers.update(self.headers)
 
-    def get_json(self, endpoint) -> dict:
+    def get_json(self, endpoint, params=None) -> dict:
         url = urllib.urljoin(self.base_url, endpoint)
-        response = self.session.get(url=url)
+        response = self.session.get(url=url, params=params)
         response.raise_for_status()
         return response.json()
+
+
+class SpaceXAPI(BaseAPI):
+    def __init__(self, base_url, headers):
+        super().__init__(base_url, headers)
 
     def get_latest_launch(self):
         endpoint = 'launches/latest'
@@ -43,23 +42,10 @@ class SpaceXAPI:
         return image_urls
 
 
-class NasaAPI:
-    def __init__(self, token):
-        self.base_url = 'https://api.nasa.gov/'
-        self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
-                          'Chrome/70.0.3538.77 Safari/537.36',
-        }
-        self.params = {'api_key': token}
-        self.session = requests.Session()
-        self.session.headers.update(self.headers)
-        self.session.params = self.params
-
-    def get_json(self, endpoint, params=None) -> dict:
-        url = urllib.urljoin(self.base_url, endpoint)
-        response = self.session.get(url=url, params=params)
-        response.raise_for_status()
-        return response.json()
+class NasaAPI(BaseAPI):
+    def __init__(self, base_url, headers, params):
+        super().__init__(base_url, headers)
+        self.session.params = params
 
     def get_apod_urls(self, count) -> List:
         """
@@ -116,5 +102,5 @@ class NasaAPI:
         date, filenames = self.get_epic_meta(image_type=image_type)
         epic_urls = self.get_epic_urls(date, filenames, image_type)
 
-        epic_content = asyncio.run(get_images_content(image_urls=epic_urls, params=self.params))
+        epic_content = asyncio.run(get_images_content(image_urls=epic_urls, params=self.session.params))
         save_images(dir_path=save_path, images_content=epic_content, image_name=image_name)

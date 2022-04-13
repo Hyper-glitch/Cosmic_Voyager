@@ -45,12 +45,12 @@ def run_nasa_scraper():
 
     nasa_instance = NasaAPI(base_url=base_url, headers=HEADERS, params=params)
 
-    for sub_dir in sub_dirs:
-        if sub_dir == 'APOD':
+    for subdir in sub_dirs:
+        if subdir == 'APOD':
             image_type = None
-        elif sub_dir == 'EPIC':
+        elif subdir == 'EPIC':
             image_type = 'png'
-        nasa_instance.save_images(dir_path=dir_path, image_name=scraper_name, subdir=sub_dir, image_type=image_type)
+        nasa_instance.save_images(dir_path=dir_path, image_name=scraper_name, subdir=subdir, image_type=image_type)
 
 
 if __name__ == '__main__':

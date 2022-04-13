@@ -16,4 +16,4 @@ if __name__ == '__main__':
     telegram_token = os.getenv('TG_TOKEN')
 
     tg_bot = init_telegram_bot(telegram_token=telegram_token)
-    tg_bot.send_message(text='Hello universe!', chat_id=chat_id)
+    tg_bot.send_photo(chat_id=chat_id, photo=open('images/nasa/EPIC/nasa0.png', 'rb'))

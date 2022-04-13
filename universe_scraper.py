@@ -8,15 +8,20 @@ from cosmic_APIs import SpaceXAPI, NasaAPI
 from scraper_utils import make_images_dir, save_images, get_images_content
 
 PATH_TO_SAVE_IMAGES = 'images/'
+HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                  'Chrome/70.0.3538.77 Safari/537.36',
+}
 
 
 def run_spacex_scraper():
     scraper_name = 'spacex'
+    base_url = 'https://api.spacexdata.com/v4/'
     dir_path = os.path.join(PATH_TO_SAVE_IMAGES, scraper_name)
 
     make_images_dir(dir_path=dir_path)
 
-    space_x_instance = SpaceXAPI()
+    space_x_instance = SpaceXAPI(base_url=base_url, headers=HEADERS)
     latest_launch = space_x_instance.get_latest_launch()
     image_urls = latest_launch['links']['flickr']['original']
 
@@ -33,9 +38,11 @@ def run_nasa_scraper():
 
     scraper_name = 'nasa'
     image_type = 'png'
+    base_url = 'https://api.nasa.gov/'
+    params = {'api_key': nasa_token}
     dir_path = os.path.join(PATH_TO_SAVE_IMAGES, scraper_name)
 
-    nasa_instance = NasaAPI(token=nasa_token)
+    nasa_instance = NasaAPI(base_url=base_url, headers=HEADERS, params=params)
     nasa_instance.save_apod_images(dir_path=dir_path, image_name=scraper_name)
     nasa_instance.save_epic_images(dir_path=dir_path, image_type=image_type, image_name=scraper_name)
 

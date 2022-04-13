@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 from cosmic_APIs import SpaceXAPI, NasaAPI
 from scraper_utils import make_images_dir, save_images, get_images_content
-
+from telegram_bot import init_telegram_bot
 
 PATH_TO_SAVE_IMAGES = 'images/'
 HEADERS = {
@@ -34,8 +34,6 @@ def run_spacex_scraper():
 
 
 def run_nasa_scraper():
-    load_dotenv()
-    nasa_token = os.getenv('NASA_API_KEY')
 
     scraper_name = 'nasa'
     base_url = 'https://api.nasa.gov/'
@@ -55,6 +53,11 @@ def run_nasa_scraper():
 
 if __name__ == '__main__':
     start = datetime.now()
-    run_spacex_scraper()
-    run_nasa_scraper()
+    load_dotenv()
+    nasa_token = os.getenv('NASA_API_KEY')
+    telegram_token = os.getenv('TG_TOKEN')
+
+    init_telegram_bot(telegram_token)
+    # run_spacex_scraper()
+    # run_nasa_scraper(nasa_token)
     print(datetime.now() - start)

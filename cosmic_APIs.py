@@ -84,23 +84,15 @@ class NasaAPI(BaseAPI):
             epic_urls.append(url)
         return epic_urls
 
-    def save_apod_images(self, dir_path, image_name):
-        subdir = 'APOD'
+    def save_images(self, dir_path, image_type, image_name, subdir):
+
+        if subdir == 'EPIC':
+            date, filenames = self.get_epic_meta(image_type=image_type)
+            urls = self.get_epic_urls(date, filenames, image_type)
+        elif subdir == 'APOD':
+            urls = self.get_apod_urls(count=50)
+
         save_path = os.path.join(dir_path, subdir)
         make_images_dir(dir_path=save_path)
-
-        apod_image_urls = self.get_apod_urls(count=50)
-
-        images_content = asyncio.run(get_images_content(image_urls=apod_image_urls))
-        save_images(dir_path=save_path, images_content=images_content, image_name=image_name)
-
-    def save_epic_images(self, dir_path, image_type, image_name):
-        subdir = 'EPIC'
-        save_path = os.path.join(dir_path, subdir)
-        make_images_dir(dir_path=save_path)
-
-        date, filenames = self.get_epic_meta(image_type=image_type)
-        epic_urls = self.get_epic_urls(date, filenames, image_type)
-
-        epic_content = asyncio.run(get_images_content(image_urls=epic_urls, params=self.session.params))
-        save_images(dir_path=save_path, images_content=epic_content, image_name=image_name)
+        content = asyncio.run(get_images_content(image_urls=urls, params=self.session.params))
+        save_images(dir_path=save_path, images_content=content, image_name=image_name)

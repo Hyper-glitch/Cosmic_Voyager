@@ -15,8 +15,8 @@ class SpaceXAPI:
     def __init__(self):
         self.base_url = 'https://api.spacexdata.com/v4/'
         self.headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
-                          "Chrome/70.0.3538.77 Safari/537.36",
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                          'Chrome/70.0.3538.77 Safari/537.36',
         }
         self.session = requests.Session()
         self.session.headers.update(self.headers)
@@ -34,13 +34,12 @@ class SpaceXAPI:
     def get_latest_launch_with_images(self):
         endpoint = 'launches'
         launches = self.get_json(endpoint=endpoint)
-
         image_urls = []
 
         for launch in launches:
-            images = launch['links']['flickr']['original']
-            if images:
-                image_urls.extend(images)
+            urls = launch['links']['flickr']['original']
+            if urls:
+                image_urls.extend(urls)
         return image_urls
 
 
@@ -69,20 +68,20 @@ class NasaAPI:
         """
         endpoint = 'planetary/apod'
         images = self.get_json(endpoint=endpoint, params={'count': count})
-
         image_urls = []
+
         for image in images:
             hd_image_url = image.get('hdurl')
             if hd_image_url:
                 image_urls.append(hd_image_url)
         return image_urls
 
-    def get_epic_meta(self, image_type):
+    def get_epic_meta(self, image_type) -> (str, str):
         endpoint = 'EPIC/api/natural/images'
         images = self.get_json(endpoint=endpoint)
-
         date = images[0]['date']
         filenames = []
+
         for image in images:
             filename = image['image'] + f'.{image_type}'
             filenames.append(filename)
@@ -102,18 +101,20 @@ class NasaAPI:
     def save_apod_images(self, dir_path, image_name):
         subdir = 'APOD'
         save_path = os.path.join(dir_path, subdir)
-
         make_images_dir(dir_path=save_path)
+
         apod_image_urls = self.get_apod_urls(count=50)
+
         images_content = asyncio.run(get_images_content(image_urls=apod_image_urls))
         save_images(dir_path=save_path, images_content=images_content, image_name=image_name)
 
     def save_epic_images(self, dir_path, image_type, image_name):
         subdir = 'EPIC'
         save_path = os.path.join(dir_path, subdir)
-
         make_images_dir(dir_path=save_path)
+
         date, filenames = self.get_epic_meta(image_type=image_type)
         epic_urls = self.get_epic_urls(date, filenames, image_type)
+
         epic_content = asyncio.run(get_images_content(image_urls=epic_urls, params=self.params))
         save_images(dir_path=save_path, images_content=epic_content, image_name=image_name)

@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from cosmic_APIs import SpaceXAPI, NasaAPI
 from scraper_utils import make_images_dir, save_images, get_images_content
 
+
 PATH_TO_SAVE_IMAGES = 'images/'
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -37,14 +38,19 @@ def run_nasa_scraper():
     nasa_token = os.getenv('NASA_API_KEY')
 
     scraper_name = 'nasa'
-    image_type = 'png'
     base_url = 'https://api.nasa.gov/'
     params = {'api_key': nasa_token}
+    sub_dirs = ['APOD', 'EPIC']
     dir_path = os.path.join(PATH_TO_SAVE_IMAGES, scraper_name)
 
     nasa_instance = NasaAPI(base_url=base_url, headers=HEADERS, params=params)
-    nasa_instance.save_apod_images(dir_path=dir_path, image_name=scraper_name)
-    nasa_instance.save_epic_images(dir_path=dir_path, image_type=image_type, image_name=scraper_name)
+
+    for sub_dir in sub_dirs:
+        if sub_dir == 'APOD':
+            image_type = None
+        elif sub_dir == 'EPIC':
+            image_type = 'png'
+        nasa_instance.save_images(dir_path=dir_path, image_name=scraper_name, subdir=sub_dir, image_type=image_type)
 
 
 if __name__ == '__main__':

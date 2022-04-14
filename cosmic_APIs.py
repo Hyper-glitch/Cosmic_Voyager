@@ -23,9 +23,6 @@ class BaseAPI:
 
 
 class SpaceXAPI(BaseAPI):
-    def __init__(self, base_url, headers):
-        super().__init__(base_url, headers)
-
     def get_latest_launch(self):
         endpoint = 'launches/latest'
         return self.get_json(endpoint=endpoint)

@@ -1,12 +1,13 @@
 import asyncio
 import os
+import time
 from datetime import datetime
 
+import telegram
 from dotenv import load_dotenv
 
 from cosmic_APIs import SpaceXAPI, NasaAPI
-from scraper_utils import make_images_dir, save_images, get_images_content
-from telegram_bot import init_telegram_bot
+from scraper_utils import make_images_dir, save_images, get_images_content, get_all_image_paths
 
 PATH_TO_SAVE_IMAGES = 'images/'
 HEADERS = {
@@ -16,6 +17,7 @@ HEADERS = {
 
 
 def run_spacex_scraper():
+
     scraper_name = 'spacex'
     base_url = 'https://api.spacexdata.com/v4/'
     dir_path = os.path.join(PATH_TO_SAVE_IMAGES, scraper_name)
@@ -51,13 +53,27 @@ def run_nasa_scraper():
         nasa_instance.save_images(dir_path=dir_path, image_name=scraper_name, subdir=subdir, image_type=image_type)
 
 
+def run_telegram_bot(telegram_token, send_photo_period, chat_id):
+
+    tg_bot = telegram.Bot(token=telegram_token)
+    image_paths = get_all_image_paths(dir_path=PATH_TO_SAVE_IMAGES)
+
+    for image_path in image_paths:
+        tg_bot.send_photo(chat_id=chat_id, photo=open(image_path, 'rb'))
+        time.sleep(send_photo_period)
+
+
 if __name__ == '__main__':
     start = datetime.now()
-    load_dotenv()
-    nasa_token = os.getenv('NASA_API_KEY')
-    telegram_token = os.getenv('TG_TOKEN')
 
-    init_telegram_bot(telegram_token)
+    load_dotenv()
+    chat_id = os.environ.get('CHAT_ID')
+    send_photo_period = float(os.getenv('SEND_PHOTO_PERIOD'))
+    telegram_token = os.getenv('TG_TOKEN')
+    nasa_token = os.getenv('NASA_API_KEY')
+
+    run_telegram_bot(telegram_token=telegram_token, send_photo_period=send_photo_period, chat_id=chat_id)
     # run_spacex_scraper()
     # run_nasa_scraper(nasa_token)
+
     print(datetime.now() - start)

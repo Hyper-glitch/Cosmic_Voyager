@@ -9,6 +9,20 @@ def make_images_dir(dir_path):
     pathlib.Path(dir_path).mkdir(parents=True, exist_ok=True)
 
 
+def get_all_image_paths(dir_path):
+    dirs = []
+    image_paths = []
+
+    for dir in os.walk(dir_path):
+        dirs.append(dir)
+
+    for address, folders, files in dirs:
+        for file in files:
+            image_path = address +'/'+ file
+            image_paths.append(image_path)
+    return image_paths
+
+
 def save_images(dir_path, images_content, image_name):
     for index, image_content in enumerate(images_content):
         filename = f"{image_name}{index}{image_content['image_extension']}"

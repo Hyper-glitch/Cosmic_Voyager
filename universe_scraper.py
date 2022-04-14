@@ -35,7 +35,7 @@ def run_spacex_scraper():
     save_images(dir_path=dir_path, images_content=images_content, image_name=scraper_name)
 
 
-def run_nasa_scraper():
+def run_nasa_scraper(nasa_token):
 
     scraper_name = 'nasa'
     base_url = 'https://api.nasa.gov/'
@@ -63,17 +63,17 @@ def run_telegram_bot(telegram_token, send_photo_period, chat_id):
         time.sleep(send_photo_period)
 
 
-if __name__ == '__main__':
-    start = datetime.now()
-
+def run_universe_scraper():
     load_dotenv()
     chat_id = os.environ.get('CHAT_ID')
     send_photo_period = float(os.getenv('SEND_PHOTO_PERIOD'))
     telegram_token = os.getenv('TG_TOKEN')
     nasa_token = os.getenv('NASA_API_KEY')
 
+    run_spacex_scraper()
+    run_nasa_scraper(nasa_token=nasa_token)
     run_telegram_bot(telegram_token=telegram_token, send_photo_period=send_photo_period, chat_id=chat_id)
-    # run_spacex_scraper()
-    # run_nasa_scraper(nasa_token)
 
-    print(datetime.now() - start)
+
+if __name__ == '__main__':
+    run_universe_scraper()

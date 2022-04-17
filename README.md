@@ -22,7 +22,11 @@ git clone https://github.com/Hyper-glitch/Cosmic_Voyager.git
 ```bash
 pip install -r requirements.txt
 ```
-4. OR run with docker
+4. Run python script
+```bash
+python3 universe_scraper.py
+```
+5. Run with docker
 ```bash
 docker build -t cosmic_voyager . && docker run -d --env-file .env cosmic_voyager
 ```

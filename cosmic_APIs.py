@@ -1,22 +1,22 @@
 import asyncio
 import os.path
 import urllib.parse as urllib
-from typing import List
+from typing import List, Dict
 
 import requests
 
-from scraper_utils import make_images_dir, get_images_content, save_images
+from scraper_utils import make_images_dir, get_images_content, save_images_content
 
 
 class BaseAPI:
     """Base API class which implements with all repeatable attributes and methods."""
-    def __init__(self, base_url: str, headers: dict):
+    def __init__(self, base_url: str, headers: Dict):
         self.base_url = base_url
         self.headers = headers
         self.session = requests.Session()
         self.session.headers.update(self.headers)
 
-    def get_json(self, endpoint: str, params: dict = None) -> dict:
+    def get_json(self, endpoint: str, params: Dict = None) -> Dict:
         """Make full url and send GET request.
         :param endpoint: - it is a point to interact with definite method to API
         :param params: - additional data for getting info from response
@@ -30,7 +30,7 @@ class BaseAPI:
 
 class SpaceXAPI(BaseAPI):
     """Class to interact with SpaceX API."""
-    def get_latest_launch(self) -> dict:
+    def get_latest_launch(self) -> Dict:
         """Returns the most recent launch"""
         endpoint = 'launches/latest'
         return self.get_json(endpoint=endpoint)
@@ -119,4 +119,4 @@ class NasaAPI(BaseAPI):
         save_path = os.path.join(dir_path, subdir)
         make_images_dir(dir_path=save_path)
         content = asyncio.run(get_images_content(image_urls=urls, params=self.session.params))
-        save_images(dir_path=save_path, images_content=content, image_name=image_name)
+        save_images_content(dir_path=save_path, images_content=content, image_name=image_name)

@@ -83,7 +83,7 @@ class NasaAPI(BaseAPI):
         filenames = []
 
         for image in images:
-            filename = image['image'] + f'.{image_type}'
+            filename = f"{image['image']}.{image_type}"
             filenames.append(filename)
         return date, filenames
 
@@ -96,11 +96,11 @@ class NasaAPI(BaseAPI):
         """
         # url example https://api.nasa.gov/EPIC/archive/natural/2019/05/30/png/epic_1b_20190530011359.png?api_key=DEMO_KEY
         endpoint = 'EPIC/archive/natural/'
-        parsed_date = date.split(' ')[0].replace('-', '/')  # не придумал лучшего решения, если есть, подскажи плиз
+        parsed_date = date.split(' ')[0].replace('-', '/')
         epic_urls = []
 
         for filename in filenames:
-            url = urllib.urljoin(self.base_url, endpoint) + parsed_date + f'/{image_type}/' + filename  # здесь тоже
+            url = f"{urllib.urljoin(self.base_url, endpoint)}{parsed_date}/{image_type}/{filename}"
             epic_urls.append(url)
         return epic_urls
 
@@ -118,6 +118,6 @@ class NasaAPI(BaseAPI):
             urls = self.get_apod_urls(count=50)
 
         save_path = os.path.join(dir_path, subdir)
-        pathlib.Path(dir_path).mkdir(parents=True, exist_ok=True)
+        pathlib.Path(save_path).mkdir(parents=True, exist_ok=True)
         content = asyncio.run(get_images_content(image_urls=urls, params=self.session.params))
         save_images_content(dir_path=save_path, images_content=content, image_name=image_name)

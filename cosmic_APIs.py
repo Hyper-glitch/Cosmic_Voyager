@@ -1,11 +1,12 @@
 import asyncio
 import os.path
+import pathlib
 import urllib.parse as urllib
 from typing import List, Dict
 
 import requests
 
-from scraper_utils import make_images_dir, get_images_content, save_images_content
+from scraper_utils import get_images_content, save_images_content
 
 
 class BaseAPI:
@@ -117,6 +118,6 @@ class NasaAPI(BaseAPI):
             urls = self.get_apod_urls(count=50)
 
         save_path = os.path.join(dir_path, subdir)
-        make_images_dir(dir_path=save_path)
+        pathlib.Path(dir_path).mkdir(parents=True, exist_ok=True)
         content = asyncio.run(get_images_content(image_urls=urls, params=self.session.params))
         save_images_content(dir_path=save_path, images_content=content, image_name=image_name)

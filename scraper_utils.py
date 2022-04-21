@@ -18,7 +18,7 @@ def get_all_image_paths(dir_path: str) -> List:
 
     for address, folders, files in dirs:
         for file in files:
-            image_path = address +'/'+ file
+            image_path = f'{address}/{file}'
             image_paths.append(image_path)
     return image_paths
 

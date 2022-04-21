@@ -1,12 +1,13 @@
 import asyncio
 import os
+import pathlib
 import time
 
 import telegram
 from dotenv import load_dotenv
 
 from cosmic_APIs import SpaceXAPI, NasaAPI
-from scraper_utils import make_images_dir, save_images_content, get_images_content, get_all_image_paths
+from scraper_utils import save_images_content, get_images_content, get_all_image_paths
 
 PATH_TO_SAVE_IMAGES = 'images/'
 HEADERS = {
@@ -21,7 +22,7 @@ def run_spacex_scraper():
     base_url = 'https://api.spacexdata.com/v4/'
     dir_path = os.path.join(PATH_TO_SAVE_IMAGES, scraper_name)
 
-    make_images_dir(dir_path=dir_path)
+    pathlib.Path(dir_path).mkdir(parents=True, exist_ok=True)
 
     space_x_instance = SpaceXAPI(base_url=base_url, headers=HEADERS)
     latest_launch = space_x_instance.get_latest_launch()

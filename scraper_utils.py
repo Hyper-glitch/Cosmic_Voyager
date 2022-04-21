@@ -1,16 +1,8 @@
 import asyncio
 import os
-import pathlib
 from typing import List, Dict
 
 import aiohttp
-
-
-def make_images_dir(dir_path: str):
-    """Creates directory for saving images and check if its already exists.
-    :param dir_path: - path for creating directory.
-    """
-    pathlib.Path(dir_path).mkdir(parents=True, exist_ok=True)
 
 
 def get_all_image_paths(dir_path: str) -> List:

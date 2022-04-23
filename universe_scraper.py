@@ -59,11 +59,19 @@ def run_telegram_bot(telegram_token, send_photo_period, chat_id):
     image_paths = get_all_image_paths(dir_path=PATH_TO_SAVE_IMAGES)
 
     for image_path in image_paths:
-        tg_bot.send_photo(chat_id=chat_id, photo=open(image_path, 'rb'))
+        with open(image_path, 'rb') as photo:
+            tg_bot.send_photo(chat_id=chat_id, photo=photo)
         time.sleep(send_photo_period)
 
 
-def run_universe_scraper():
+def run_universe_scraper(nasa_token, telegram_token, send_photo_period, chat_id):
+    """Run scrapers and send photos to telegram channel."""
+    run_spacex_scraper()
+    run_nasa_scraper(nasa_token=nasa_token)
+    run_telegram_bot(telegram_token=telegram_token, send_photo_period=send_photo_period, chat_id=chat_id)
+
+
+def main():
     """The main logic for running the whole program."""
     load_dotenv()
     chat_id = os.environ.get('CHAT_ID')
@@ -71,10 +79,8 @@ def run_universe_scraper():
     telegram_token = os.getenv('TG_TOKEN')
     nasa_token = os.getenv('NASA_API_KEY')
 
-    run_spacex_scraper()
-    run_nasa_scraper(nasa_token=nasa_token)
-    run_telegram_bot(telegram_token=telegram_token, send_photo_period=send_photo_period, chat_id=chat_id)
+    run_universe_scraper(nasa_token, telegram_token, send_photo_period, chat_id)
 
 
 if __name__ == '__main__':
-    run_universe_scraper()
+    main()

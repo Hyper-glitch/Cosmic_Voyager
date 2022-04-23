@@ -9,7 +9,7 @@ import requests
 from scraper_utils import get_images_content, save_images_content
 
 
-class BaseAPI:
+class BaseApi:
     """Base API class which implements with all repeatable attributes and methods."""
     def __init__(self, base_url: str, headers: Dict):
         self.base_url = base_url
@@ -29,7 +29,7 @@ class BaseAPI:
         return response.json()
 
 
-class SpaceXAPI(BaseAPI):
+class SpacexApi(BaseApi):
     """Class to interact with SpaceX API."""
     def get_latest_launch(self) -> Dict:
         """Returns the most recent launch"""
@@ -51,7 +51,7 @@ class SpaceXAPI(BaseAPI):
         return image_urls
 
 
-class NasaAPI(BaseAPI):
+class NasaApi(BaseApi):
     """Class to interact with Nasa API."""
     def __init__(self, base_url, headers, params):
         super().__init__(base_url, headers)

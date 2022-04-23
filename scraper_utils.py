@@ -45,7 +45,7 @@ async def fetch(image_url, session, params=None) -> Dict:
     :returns: image_content: - dict with content and image's extension.
     """
     image_content = {}
-    async with session.get(image_url, params=params) as response:
+    async with session.get(image_url, params=params, ssl=False) as response:
         response.raise_for_status()
         content = await response.read()
         image_extension = get_image_extension(response.url.name)
@@ -60,7 +60,8 @@ async def get_images_content(image_urls: List, params: Dict = None):
     :returns: images_content: - list of dicts with content and image's extension.
     """
     tasks = []
-    async with aiohttp.ClientSession() as session:
+    connector = aiohttp.TCPConnector(verify_ssl=False)
+    async with aiohttp.ClientSession(connector=connector) as session:
         for image_url in image_urls:
             tasks.append(asyncio.create_task(fetch(image_url, session, params)))
         images_content = asyncio.gather(*tasks)

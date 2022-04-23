@@ -10,13 +10,13 @@ def get_all_image_paths(dir_path: str) -> List:
     :param dir_path: - path for creating directory.
     :returns: image_paths - all paths for images.
     """
-    dirs = []
+    paths = []
     image_paths = []
 
-    for dir in os.walk(dir_path):
-        dirs.append(dir)
+    for path in os.walk(dir_path):
+        paths.append(path)
 
-    for address, folders, files in dirs:
+    for address, folders, files in paths:
         for file in files:
             image_path = f'{address}/{file}'
             image_paths.append(image_path)

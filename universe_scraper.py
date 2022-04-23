@@ -6,7 +6,7 @@ import time
 import telegram
 from dotenv import load_dotenv
 
-from cosmic_APIs import SpaceXAPI, NasaAPI
+from cosmic_APIs import SpacexApi, NasaApi
 from scraper_utils import save_images_content, get_images_content, get_all_image_paths
 
 PATH_TO_SAVE_IMAGES = 'images/'
@@ -24,7 +24,7 @@ def run_spacex_scraper():
 
     pathlib.Path(dir_path).mkdir(parents=True, exist_ok=True)
 
-    space_x_instance = SpaceXAPI(base_url=base_url, headers=HEADERS)
+    space_x_instance = SpacexApi(base_url=base_url, headers=HEADERS)
     latest_launch = space_x_instance.get_latest_launch()
     image_urls = latest_launch['links']['flickr']['original']
 
@@ -43,7 +43,7 @@ def run_nasa_scraper(nasa_token):
     sub_dirs = ['APOD', 'EPIC']
     dir_path = os.path.join(PATH_TO_SAVE_IMAGES, scraper_name)
 
-    nasa_instance = NasaAPI(base_url=base_url, headers=HEADERS, params=params)
+    nasa_instance = NasaApi(base_url=base_url, headers=HEADERS, params=params)
 
     for sub_dir in sub_dirs:
         if sub_dir == 'APOD':

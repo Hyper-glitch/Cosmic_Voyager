@@ -48,7 +48,7 @@ async def fetch(image_url, session, params=None) -> Dict:
     async with session.get(image_url, params=params, ssl=False) as response:
         response.raise_for_status()
         content = await response.read()
-        image_extension = get_image_extension(response.url.name)
+        image_extension = os.path.splitext(response.url.name)[1]
         image_content.update({'content': content, 'image_extension': image_extension})
         return image_content
 
@@ -66,11 +66,3 @@ async def get_images_content(image_urls: List, headers: dict, params: Dict = Non
             tasks.append(asyncio.create_task(fetch(image_url, session, params)))
         images_content = asyncio.gather(*tasks)
         return await images_content
-
-
-def get_image_extension(url: str) -> str:
-    """Gets image's extension from url.
-    :param url: - urls for getting images.
-    :returns: image extension.
-    """
-    return os.path.splitext(url)[1]

@@ -31,7 +31,7 @@ def run_spacex_scraper():
     if not image_urls:
         image_urls = space_x_instance.get_latest_launch_with_images()
 
-    images_content = asyncio.run(get_images_content(image_urls=image_urls))
+    images_content = asyncio.run(get_images_content(image_urls=image_urls, headers=HEADERS))
     save_images_content(dir_path=dir_path, images_content=images_content, image_name=scraper_name)
 
 

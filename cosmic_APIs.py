@@ -11,6 +11,7 @@ from scraper_utils import get_images_content, save_images_content
 
 class BaseApi:
     """Base API class which implements with all repeatable attributes and methods."""
+
     def __init__(self, base_url: str, headers: Dict):
         self.base_url = base_url
         self.headers = headers
@@ -31,6 +32,7 @@ class BaseApi:
 
 class SpacexApi(BaseApi):
     """Class to interact with SpaceX API."""
+
     def get_latest_launch(self) -> Dict:
         """Returns the most recent launch"""
         endpoint = 'launches/latest'
@@ -53,6 +55,7 @@ class SpacexApi(BaseApi):
 
 class NasaApi(BaseApi):
     """Class to interact with Nasa API."""
+
     def __init__(self, base_url, headers, params):
         super().__init__(base_url, headers)
         self.session.params = params
@@ -119,5 +122,5 @@ class NasaApi(BaseApi):
 
         save_path = os.path.join(dir_path, subdir)
         pathlib.Path(save_path).mkdir(parents=True, exist_ok=True)
-        content = asyncio.run(get_images_content(image_urls=urls, params=self.session.params))
+        content = asyncio.run(get_images_content(image_urls=urls, params=self.session.params, headers=self.headers))
         save_images_content(dir_path=save_path, images_content=content, image_name=image_name)

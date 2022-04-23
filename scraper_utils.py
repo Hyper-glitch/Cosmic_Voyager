@@ -53,7 +53,7 @@ async def fetch(image_url, session, params=None) -> Dict:
         return image_content
 
 
-async def get_images_content(image_urls: List, params: Dict = None):
+async def get_images_content(image_urls: List, headers: dict, params: Dict = None):
     """Creates tasks for async getting image's content.
     :param image_urls: - urls for getting images.
     :param params: - additional info for getting response if it needs.
@@ -61,7 +61,7 @@ async def get_images_content(image_urls: List, params: Dict = None):
     """
     tasks = []
     connector = aiohttp.TCPConnector(verify_ssl=False)
-    async with aiohttp.ClientSession(connector=connector) as session:
+    async with aiohttp.ClientSession(connector=connector, headers=headers) as session:
         for image_url in image_urls:
             tasks.append(asyncio.create_task(fetch(image_url, session, params)))
         images_content = asyncio.gather(*tasks)
